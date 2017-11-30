@@ -822,17 +822,17 @@ row cfg children =
             div
                 [ classes <|
                     [ "_Av__spacer"
-                    , "pl"
+                    , (if cfg.stackWhenSmall then
+                        "md:"
+                       else
+                        ""
+                      )
+                        ++ "pl-"
                         ++ toString cfg.spacing
-                        ++ (if cfg.stackWhenSmall then
-                                "-ns"
-                            else
-                                ""
-                           )
                     ]
                         ++ (if cfg.stackWhenSmall then
-                                [ "pb" ++ toString cfg.spacing
-                                , "pb0-ns"
+                                [ "pb-" ++ toString cfg.spacing
+                                , "md:pb-0"
                                 ]
                             else
                                 []
@@ -845,7 +845,7 @@ row cfg children =
                 (\child ->
                     Html.div
                         [ classes
-                            [ if cfg.isolateChildren then
+                            [ if cfg.isolateChildren || not cfg.expandChildren then
                                 ""
                               else
                                 "flex-auto"
@@ -866,7 +866,7 @@ row cfg children =
                 List.concat
                     [ [ "_Av__row", "flex" ]
                     , if cfg.stackWhenSmall then
-                        [ "sm:flex_col", "md:flex-row" ]
+                        [ "flex-col", "md:flex-row" ]
                       else
                         [ "flex-row" ]
                     , if cfg.isolateChildren then
@@ -897,7 +897,7 @@ rowCfg :
     , classes : List String
     }
 rowCfg =
-    { stackWhenSmall = True
+    { stackWhenSmall = False
     , spacing = 1
     , isolateChildren = False
     , expandChildren = True
