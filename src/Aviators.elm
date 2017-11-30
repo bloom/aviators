@@ -12,6 +12,8 @@ import Html.Attributes exposing (attribute, class, href, placeholder, rel, style
 import Html.Events exposing (keyCode, on, onClick, onInput, onMouseDown, onMouseUp, onWithOptions)
 import Json.Decode
 import SelectList exposing (Position(Selected), SelectList)
+import Tailwind exposing (asClasses, tailwind, withClasses)
+import Tailwind.Classes exposing (bg_red, block, border, border_grey_dark, border_red, border_transparent, text_grey_dark)
 
 
 {-
@@ -366,9 +368,9 @@ input cfg =
                         ]
     in
     Html.label
-        [ classes
-            [ "text-grey-dark"
-            , "block"
+        [ tailwind
+            [ text_grey_dark
+            , block
             ]
         ]
         [ column { columnCfg | spacing = 2 } <|
@@ -378,26 +380,23 @@ input cfg =
                         ([ Html.Attributes.value cfg.value
                          , Html.Attributes.type_ cfg.type_
                          , Html.Attributes.placeholder cfg.placeholder
-                         , classes
-                            [ "block"
-                            , "bg-" ++ cfg.bgColor
-                            , "p-3"
+                         , tailwind <|
+                            withClasses
+                                [ "block"
+                                , "p-3"
 
-                            -- No actual border, because it affects the height
-                            -- of the input, and we want buttons and inputs
-                            -- to keep to the same height
-                            , "border-0"
-
-                            -- Fake red border on error state
-                            , if cfg.error /= "" then
-                                "outline-red"
-                              else
-                                ""
-                            , "w-full"
-                            , "rounded"
-                            , "focus-outline"
-                            , "transition"
-                            ]
+                                -- Fake red border on error state
+                                , "w-full"
+                                , "rounded"
+                                , "focus-outline"
+                                , "transition"
+                                ]
+                                [ if cfg.error /= "" then
+                                    border_red
+                                  else
+                                    border_grey_dark
+                                , border
+                                ]
                          , on "keydown"
                             (keyCode
                                 |> Json.Decode.andThen
@@ -663,7 +662,12 @@ button cfg child =
         borderClasses =
             case cfg.border of
                 Nothing ->
-                    [ "border-0" ]
+                    [ "border"
+                    , if cfg.disabled then
+                        "border-" ++ cfg.disabledBgColor
+                      else
+                        "border-" ++ cfg.bgColor
+                    ]
 
                 Just { color, thickness, disabledColor } ->
                     [ if cfg.disabled then
