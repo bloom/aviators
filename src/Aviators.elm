@@ -779,28 +779,38 @@ testButton =
 
 {-| -}
 column :
-    { b
-        | spacing : Int
-        , classes : List String
-    }
+    ColumnCfg
     -> List (Html msg)
     -> Html msg
 column cfg children =
     let
         spacer =
-            div [ classes [ "_Av__spacer", "pb-" ++ toString cfg.spacing ] ] []
+            div [ classes [ "_Av__spacer", "h-" ++ toString cfg.spacing ] ] []
 
         interwoven =
             List.intersperse spacer children
     in
-    div [ classes <| [ "_Av__column" ] ++ cfg.classes ] interwoven
+    div
+        [ tailwind <|
+            withClasses
+                ([ "_Av__column" ] ++ cfg.classes)
+                [ w_full ]
+        ]
+        interwoven
 
 
 {-| -}
-columnCfg : { spacing : Int, classes : List String }
+columnCfg : ColumnCfg
 columnCfg =
     { spacing = 1
     , classes = []
+    }
+
+
+{-| -}
+type alias ColumnCfg =
+    { spacing : Int
+    , classes : List String
     }
 
 
