@@ -1,8 +1,8 @@
-module Aviators exposing (Debounce(..), button, buttonCfg, callout, calloutCfg, calloutCfg_error, calloutCfg_ok, column, columnCfg, el, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, headline, headlineCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, subheadline, subheadlineCfg, wrapWithClasses)
+module Aviators exposing (Arrangement(..), Debounce(..), RowCfg, button, buttonCfg, callout, calloutCfg, calloutCfg_error, calloutCfg_ok, column, columnCfg, el, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, headline, headlineCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, subheadline, subheadlineCfg, wrapWithClasses, wrapWithTailwind)
 
 {-| Aviators! The best UI Library made specifically for Bloom Built in Elm.
 
-@docs Debounce, button, buttonCfg, callout, calloutCfg, calloutCfg_ok, calloutCfg_error, column, columnCfg, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, headline, headlineCfg, subheadline, subheadlineCfg, wrapWithClasses, el
+@docs Debounce, button, buttonCfg, callout, calloutCfg, calloutCfg_ok, calloutCfg_error, column, columnCfg, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, headline, headlineCfg, subheadline, subheadlineCfg, wrapWithClasses, el, wrapWithTailwind, Arrangement, RowCfg
 
 -}
 
@@ -13,7 +13,7 @@ import Html.Events exposing (keyCode, on, onClick, onInput, onMouseDown, onMouse
 import Json.Decode
 import SelectList exposing (Position(Selected), SelectList)
 import Tailwind exposing (asClasses, tailwind, withClasses)
-import Tailwind.Classes exposing (bg_red, block, border, border_grey_dark, border_red, border_transparent, text_grey_dark)
+import Tailwind.Classes exposing (TailwindClass, bg_red, block, border, border_grey_dark, border_red, border_transparent, flex, flex_auto, flex_col, flex_row, items_end, items_start, items_stretch, justify_between, md, text_grey_dark, w_full)
 
 
 {-
@@ -158,7 +158,7 @@ pickOneFromFew ({ options } as cfg) =
                 |> SelectList.toList
                 |> styleByIndex
                 |> renderFragments
-                |> row { rowCfg | expandChildren = True }
+                |> row { rowCfg | arrangement = Expand }
             ]
         ]
 
@@ -230,7 +230,7 @@ nav cfg child =
         , "bg-white"
         ]
     <|
-        row { rowCfg | isolateChildren = True }
+        row { rowCfg | arrangement = Isolate }
             [ ghostButton { ghostButtonCfg | onClick = cfg.onClickLogo, ariaLabel = "Navigate to Home" } <|
                 img
                     { src = cfg.logo
@@ -811,13 +811,7 @@ testColumn =
 
 {-| -}
 row :
-    { a
-        | expandChildren : Bool
-        , isolateChildren : Bool
-        , stackWhenSmall : Bool
-        , spacing : number
-        , classes : List String
-    }
+    RowCfg
     -> List (Html msg)
     -> Html msg
 row cfg children =
@@ -848,12 +842,13 @@ row cfg children =
             List.map
                 (\child ->
                     Html.div
-                        [ classes
-                            [ if cfg.isolateChildren || not cfg.expandChildren then
-                                ""
-                              else
-                                "flex-auto"
-                            ]
+                        [ tailwind <|
+                            case cfg.arrangement of
+                                Expand ->
+                                    [ flex_auto ]
+
+                                _ ->
+                                    []
                         ]
                         [ child ]
                 )
@@ -866,47 +861,58 @@ row cfg children =
                 List.intersperse spacer flexifiedChildren
 
         finalClasses =
-            classes <|
-                List.concat
-                    [ [ "_Av__row", "flex" ]
-                    , if cfg.stackWhenSmall then
-                        [ "flex-col", "md:flex-row" ]
-                      else
-                        [ "flex-row" ]
-                    , if cfg.isolateChildren then
-                        [ "justify-between" ]
-                      else
-                        []
-                    , if cfg.expandChildren then
-                        [ "items-stretch" ]
-                      else
-                        [ -- If we're not expanding the children, left-align when small
-                          "items-start"
+            tailwind <|
+                withClasses
+                    (List.concat [ [ "_Av__row" ], cfg.classes ])
+                    (List.concat
+                        [ [ flex, w_full ]
+                        , if cfg.stackWhenSmall then
+                            [ flex_col, md flex_row ]
+                          else
+                            [ flex_row ]
+                        , case cfg.arrangement of
+                            Start ->
+                                [ items_start ]
 
-                        -- If we're not expanding the children, center when not small
-                        , "md:items-center"
+                            End ->
+                                [ items_end ]
+
+                            Expand ->
+                                [ items_stretch ]
+
+                            Isolate ->
+                                [ justify_between ]
                         ]
-                    , cfg.classes
-                    ]
+                    )
     in
     div [ finalClasses ] interwoven
 
 
 {-| -}
-rowCfg :
-    { isolateChildren : Bool
-    , spacing : number
-    , stackWhenSmall : Bool
-    , expandChildren : Bool
-    , classes : List String
-    }
+rowCfg : RowCfg
 rowCfg =
     { stackWhenSmall = False
     , spacing = 1
-    , isolateChildren = False
-    , expandChildren = True
+    , arrangement = Start
     , classes = []
     }
+
+
+{-| -}
+type alias RowCfg =
+    { spacing : Int
+    , stackWhenSmall : Bool
+    , arrangement : Arrangement
+    , classes : List String
+    }
+
+
+{-| -}
+type Arrangement
+    = Expand
+    | Isolate
+    | Start
+    | End
 
 
 {-| -}
@@ -1042,7 +1048,13 @@ imgCfg =
 {-| -}
 wrapWithClasses : List String -> Html msg -> Html msg
 wrapWithClasses cs child =
-    div [ classes cs ] [ child ]
+    div [ classes ("__Av_class_wrapper" :: cs) ] [ child ]
+
+
+{-| -}
+wrapWithTailwind : List TailwindClass -> Html msg -> Html msg
+wrapWithTailwind cs child =
+    div [ tailwind cs, class "__Av_tailwind_wrapper" ] [ child ]
 
 
 {-| -}
