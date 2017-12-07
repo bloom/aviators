@@ -835,12 +835,12 @@ row cfg children =
                        else
                         ""
                       )
-                        ++ "pl-"
+                        ++ "w-"
                         ++ toString cfg.spacing
                     ]
                         ++ (if cfg.stackWhenSmall then
-                                [ "pb-" ++ toString cfg.spacing
-                                , "md:pb-0"
+                                [ "h-" ++ toString cfg.spacing
+                                , "md:h-0"
                                 ]
                             else
                                 []
