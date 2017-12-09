@@ -13,7 +13,7 @@ import Html.Events exposing (keyCode, on, onClick, onInput, onMouseDown, onMouse
 import Json.Decode
 import SelectList exposing (Position(Selected), SelectList)
 import Tailwind exposing (asClasses, tailwind, withClasses)
-import Tailwind.Classes exposing (TailwindClass, bg_red, block, border, border_grey_dark, border_red, border_transparent, flex, flex_auto, flex_col, flex_row, items_end, items_start, items_stretch, justify_between, md, text_grey_dark, w_full)
+import Tailwind.Classes exposing (TailwindClass, bg_blue, bg_grey, bg_red, bg_teal, block, border, border_blue, border_grey, border_grey_dark, border_l_0, border_red, border_t, border_t_0, border_transparent, flex, flex_auto, flex_col, flex_row, font_bold, h_full, items_end, items_start, items_stretch, justify_between, md, p_2, rounded_b, rounded_b_none, rounded_bl_none, rounded_l, rounded_r, rounded_t, rounded_t_none, sm, text_grey, text_grey_dark, text_white, w_full)
 
 
 {-
@@ -68,16 +68,27 @@ pickOneFromFew ({ options } as cfg) =
             SelectList.mapBy
                 (\position option ->
                     { attrs =
-                        if position == Selected then
-                            [ classes
-                                [ "bg-blue"
-                                , "text-white"
-                                , "border-blue"
-                                , "h-full"
+                        (if position == Selected then
+                            [ tailwind
+                                [ bg_blue
+                                , text_white
+                                , border_blue
+                                , h_full
                                 ]
                             ]
-                        else
-                            [ classes [ "border-grey", "bg-transparent", "text-grey", "border" ] ]
+                         else
+                            [ tailwind
+                                [ border_grey
+                                , text_grey
+                                ]
+                            ]
+                        )
+                            ++ [ tailwind
+                                    [ p_2
+                                    , w_full
+                                    , border
+                                    ]
+                               ]
                     , value = option
                     }
                 )
@@ -88,23 +99,28 @@ pickOneFromFew ({ options } as cfg) =
                 (\idx { attrs, value } ->
                     if idx == 0 then
                         { attrs =
-                            [ classes
+                            [ tailwind
                                 -- Rounding the top when small, and the left when not small
-                                [ "sm:rounded-t", "md:rounded-l" ]
+                                [ rounded_t
+                                , md rounded_t_none
+                                , md rounded_l
+                                ]
                             ]
                                 ++ attrs
                         , value = value
                         }
                     else if idx == List.length list - 1 then
                         { attrs =
-                            [ classes
+                            [ tailwind
                                 [ -- Rounding the bottom when small, and the right when not small
-                                  "sm:rounded-b"
-                                , "md:rounded-r"
+                                  rounded_b
+                                , md rounded_b_none
+                                , md rounded_r
 
                                 -- Taking off left or top borders on non-first items
-                                , "sm:border-top-0"
-                                , "md:border-left-0"
+                                , border_t_0
+                                , md border_t
+                                , md border_l_0
                                 ]
                             ]
                                 ++ attrs
@@ -112,10 +128,11 @@ pickOneFromFew ({ options } as cfg) =
                         }
                     else
                         { attrs =
-                            [ classes
+                            [ tailwind
                                 [ -- Taking off left or top borders on non-first items
-                                  "sm:border-top-0"
-                                , "md:border-left-0"
+                                  border_t_0
+                                , md border_t
+                                , md border_l_0
                                 ]
                             ]
                                 ++ attrs
@@ -128,7 +145,7 @@ pickOneFromFew ({ options } as cfg) =
             List.map
                 (\fragment ->
                     Html.button
-                        (case cfg.onChange of
+                        ((case cfg.onChange of
                             Just onChange ->
                                 -- If we use "onClick" here instead of "onWithOptions" Safari sends two events, one
                                 -- with old message content, and one with the correct message content, but in backward
@@ -139,17 +156,18 @@ pickOneFromFew ({ options } as cfg) =
 
                             Nothing ->
                                 []
-                                    ++ fragment.attrs
+                         )
+                            ++ fragment.attrs
                         )
                         [ Html.text <| cfg.labelForOption fragment.value ]
                 )
                 fragments
     in
     Html.label
-        [ classes
-            [ "text-dark-grey"
-            , "block"
-            , "font-bold"
+        [ tailwind
+            [ text_grey_dark
+            , block
+            , font_bold
             ]
         ]
         [ column { columnCfg | spacing = 2 }
@@ -158,7 +176,7 @@ pickOneFromFew ({ options } as cfg) =
                 |> SelectList.toList
                 |> styleByIndex
                 |> renderFragments
-                |> row { rowCfg | arrangement = Expand }
+                |> row { rowCfg | spacing = 0, arrangement = Expand, stackWhenSmall = True }
             ]
         ]
 
