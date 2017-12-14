@@ -1,8 +1,8 @@
-module Aviators exposing (Arrangement(..), Debounce(..), RowCfg, button, buttonCfg, callout, calloutCfg, calloutCfg_error, calloutCfg_ok, column, columnCfg, el, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, headline, headlineCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, subheadline, subheadlineCfg, wrapWithClasses, wrapWithTailwind)
+module Aviators exposing (Arrangement(..), Debounce(..), OutlineButtonCfg, RowCfg, button, buttonCfg, callout, calloutCfg, calloutCfg_error, calloutCfg_ok, column, columnCfg, el, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, headline, headlineCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, subheadline, subheadlineCfg, wrapWithClasses, wrapWithTailwind)
 
 {-| Aviators! The best UI Library made specifically for Bloom Built in Elm.
 
-@docs Debounce, button, buttonCfg, callout, calloutCfg, calloutCfg_ok, calloutCfg_error, column, columnCfg, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, headline, headlineCfg, subheadline, subheadlineCfg, wrapWithClasses, el, wrapWithTailwind, Arrangement, RowCfg
+@docs Debounce, button, buttonCfg, callout, calloutCfg, calloutCfg_ok, calloutCfg_error, column, columnCfg, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, OutlineButtonCfg, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, headline, headlineCfg, subheadline, subheadlineCfg, wrapWithClasses, el, wrapWithTailwind, Arrangement, RowCfg
 
 -}
 
@@ -13,7 +13,7 @@ import Html.Events exposing (keyCode, on, onClick, onInput, onMouseDown, onMouse
 import Json.Decode
 import SelectList exposing (Position(Selected), SelectList)
 import Tailwind exposing (asClasses, tailwind, withClasses)
-import Tailwind.Classes exposing (TailwindClass, bg_blue, bg_grey, bg_red, bg_teal, block, border, border_blue, border_grey, border_grey_dark, border_l_0, border_red, border_t, border_t_0, border_transparent, flex, flex_auto, flex_col, flex_row, font_bold, h_full, items_end, items_start, items_stretch, justify_between, md, p_2, rounded_b, rounded_b_none, rounded_bl_none, rounded_l, rounded_r, rounded_t, rounded_t_none, sm, text_grey, text_grey_dark, text_white, w_full)
+import Tailwind.Classes exposing (TailwindClass, bg_blue, bg_grey, bg_red, bg_teal, block, border, border_blue, border_grey, border_grey_dark, border_l_0, border_red, border_t, border_t_0, border_transparent, flex, flex_1, flex_auto, flex_col, flex_row, font_bold, h_32, h_full, items_center, items_end, items_start, items_stretch, justify_between, justify_center, justify_end, justify_start, md, p_2, p_4, p_8, rounded_b, rounded_b_none, rounded_bl_none, rounded_l, rounded_r, rounded_t, rounded_t_none, sm, text_grey, text_grey_dark, text_white, w_full)
 
 
 {-
@@ -239,16 +239,17 @@ floatingPageTest =
 {-| -}
 nav : NavCfg msg -> Html msg -> Html msg
 nav cfg child =
-    wrapWithClasses
-        [ "h-32"
-        , "w-full"
-        , "p-4"
-        , "md:py-0"
-        , "md:px-8"
-        , "bg-white"
+    el
+        [ tailwind
+            [ w_full
+            , sm p_8
+            , p_4
+            ]
+        , style [ ( "background-color", "rgb(249, 251, 251)" ) ]
         ]
     <|
-        row { rowCfg | arrangement = Isolate }
+        row
+            { rowCfg | arrangement = Isolate, crossArrangement = Middle, stackWhenSmall = True, spacing = 4 }
             [ ghostButton { ghostButtonCfg | onClick = cfg.onClickLogo, ariaLabel = "Navigate to Home" } <|
                 img
                     { src = cfg.logo
@@ -465,6 +466,7 @@ type alias InputConfig msg =
     , type_ : String
     , value : String
     , error : String
+    , attributes : List (Html.Attribute msg)
     }
 
 
@@ -481,6 +483,7 @@ inputCfg =
     , onEscape = Nothing
     , value = ""
     , placeholder = ""
+    , attributes = []
     }
 
 
@@ -520,14 +523,16 @@ For example: logo image
 ghostButton : GhostButtonCfg msg -> Html msg -> Html msg
 ghostButton cfg child =
     Html.button
-        [ classes
+        ([ classes
             [ "border-0"
             , "p-0"
             , "cursor-pointer"
             , "rounded"
             , "bg-transparent"
             ]
-        ]
+         ]
+            ++ cfg.attributes
+        )
         [ child ]
 
 
@@ -545,6 +550,7 @@ type alias GhostButtonCfg msg =
     , paddingH : Int
     , paddingV : Int
     , textColor : String
+    , attributes : List (Html.Attribute msg)
     }
 
 
@@ -635,6 +641,7 @@ outlineButton cfg child =
             , htmlNode = cfg.htmlNode
             , disabled = cfg.disabled
             , border = Just { color = cfg.color, thickness = cfg.outlineThickness, disabledColor = cfg.disabledColor }
+            , attributes = cfg.attributes
         }
         child
 
@@ -650,6 +657,7 @@ type alias OutlineButtonCfg msg =
     , htmlNode : List (Html.Attribute msg) -> List (Html msg) -> Html msg
     , disabled : Bool
     , outlineThickness : Int
+    , attributes : List (Html.Attribute msg)
     }
 
 
@@ -665,6 +673,7 @@ outlineButtonCfg =
     , htmlNode = Html.button
     , disabled = False
     , outlineThickness = 1
+    , attributes = []
     }
 
 
@@ -744,6 +753,7 @@ button cfg child =
 
                 Nothing ->
                     []
+            , cfg.attributes
             ]
         )
         [ child ]
@@ -763,6 +773,7 @@ type alias ButtonCfg msg =
     , paddingH : Int
     , paddingV : Int
     , textColor : String
+    , attributes : List (Html.Attribute msg)
     }
 
 
@@ -781,6 +792,7 @@ buttonCfg =
     , disabled = False
     , border = Nothing
     , ariaLabel = ""
+    , attributes = []
     }
 
 
@@ -797,7 +809,7 @@ testButton =
 
 {-| -}
 column :
-    ColumnCfg
+    ColumnCfg msg
     -> List (Html msg)
     -> Html msg
 column cfg children =
@@ -805,30 +817,35 @@ column cfg children =
         spacer =
             div [ classes [ "_Av__spacer", "h-" ++ toString cfg.spacing ] ] []
 
+        filteredChildren =
+            List.filter (\a -> a /= text "") children
+
         interwoven =
-            List.intersperse spacer children
+            List.intersperse spacer filteredChildren
     in
     div
-        [ tailwind <|
+        ([ tailwind <|
             withClasses
-                ([ "_Av__column" ] ++ cfg.classes)
+                [ "_Av__column" ]
                 [ w_full ]
-        ]
+         ]
+            ++ cfg.attributes
+        )
         interwoven
 
 
 {-| -}
-columnCfg : ColumnCfg
+columnCfg : ColumnCfg msg
 columnCfg =
     { spacing = 1
-    , classes = []
+    , attributes = []
     }
 
 
 {-| -}
-type alias ColumnCfg =
+type alias ColumnCfg msg =
     { spacing : Int
-    , classes : List String
+    , attributes : List (Html.Attribute msg)
     }
 
 
@@ -839,7 +856,7 @@ testColumn =
 
 {-| -}
 row :
-    RowCfg
+    RowCfg msg
     -> List (Html msg)
     -> Html msg
 row cfg children =
@@ -866,6 +883,9 @@ row cfg children =
                 ]
                 []
 
+        filteredChildren =
+            List.filter (\a -> a /= text "") children
+
         flexifiedChildren =
             List.map
                 (\child ->
@@ -873,14 +893,14 @@ row cfg children =
                         [ tailwind <|
                             case cfg.arrangement of
                                 Expand ->
-                                    [ flex_auto ]
+                                    [ flex_1 ]
 
                                 _ ->
                                     []
                         ]
                         [ child ]
                 )
-                children
+                filteredChildren
 
         interwoven =
             if cfg.spacing == 0 then
@@ -888,10 +908,28 @@ row cfg children =
             else
                 List.intersperse spacer flexifiedChildren
 
+        finalInlineStyles =
+            [ style <|
+                case cfg.arrangement of
+                    Start ->
+                        []
+
+                    Middle ->
+                        []
+
+                    End ->
+                        []
+
+                    Expand ->
+                        [ ( "justify-content", "stretch" ) ]
+
+                    Isolate ->
+                        []
+            ]
+
         finalClasses =
             tailwind <|
-                withClasses
-                    (List.concat [ [ "_Av__row" ], cfg.classes ])
+                withClasses [ "_Av__row" ]
                     (List.concat
                         [ [ flex, w_full ]
                         , if cfg.stackWhenSmall then
@@ -900,7 +938,28 @@ row cfg children =
                             [ flex_row ]
                         , case cfg.arrangement of
                             Start ->
+                                [ justify_start ]
+
+                            Middle ->
+                                [ justify_center ]
+
+                            End ->
+                                [ justify_end ]
+
+                            Expand ->
+                                [{- There's no tailwind class for justify-stretch, so we've got to
+                                    apply that by hand in the "styles" section
+                                 -}
+                                ]
+
+                            Isolate ->
+                                [ justify_between ]
+                        , case cfg.crossArrangement of
+                            Start ->
                                 [ items_start ]
+
+                            Middle ->
+                                [ items_center ]
 
                             End ->
                                 [ items_end ]
@@ -909,29 +968,31 @@ row cfg children =
                                 [ items_stretch ]
 
                             Isolate ->
-                                [ justify_between ]
+                                [{- This isn't great, but we just ignore this value, 'cause there is no cross isolate. -}]
                         ]
                     )
     in
-    div [ finalClasses ] interwoven
+    div ([ finalClasses ] ++ finalInlineStyles ++ cfg.attributes) interwoven
 
 
 {-| -}
-rowCfg : RowCfg
+rowCfg : RowCfg msg
 rowCfg =
     { stackWhenSmall = False
     , spacing = 1
     , arrangement = Start
-    , classes = []
+    , crossArrangement = Start
+    , attributes = []
     }
 
 
 {-| -}
-type alias RowCfg =
+type alias RowCfg msg =
     { spacing : Int
     , stackWhenSmall : Bool
     , arrangement : Arrangement
-    , classes : List String
+    , crossArrangement : Arrangement
+    , attributes : List (Html.Attribute msg)
     }
 
 
@@ -941,6 +1002,7 @@ type Arrangement
     | Isolate
     | Start
     | End
+    | Middle
 
 
 {-| -}
