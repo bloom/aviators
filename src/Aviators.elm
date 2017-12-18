@@ -443,6 +443,7 @@ input cfg =
                             )
                          ]
                             ++ debounceAttributes
+                            ++ cfg.attributes
                         )
                         []
                   ]
