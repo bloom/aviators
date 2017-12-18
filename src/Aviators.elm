@@ -443,7 +443,6 @@ input cfg =
                             )
                          ]
                             ++ debounceAttributes
-                            ++ cfg.attributes
                         )
                         []
                   ]
@@ -523,6 +522,18 @@ For example: logo image
 -}
 ghostButton : GhostButtonCfg msg -> Html msg -> Html msg
 ghostButton cfg child =
+    let
+        clickMsg =
+            case cfg.onClick of
+                Just onClick_ ->
+                    if cfg.disabled then
+                        []
+                    else
+                        [ onClick onClick_ ]
+
+                Nothing ->
+                    []
+    in
     Html.button
         ([ classes
             [ "border-0"
@@ -533,6 +544,7 @@ ghostButton cfg child =
             ]
          ]
             ++ cfg.attributes
+            ++ clickMsg
         )
         [ child ]
 
