@@ -83,10 +83,13 @@ pickOneFromFew ({ options } as cfg) =
                                 ]
                             ]
                         )
+                            -- These attributes apply to all buttons, no matter which position
                             ++ [ tailwind
                                     [ p_2
                                     , w_full
                                     , border
+                                    , h_full
+                                    , w_full
                                     ]
                                ]
                     , value = option
@@ -176,7 +179,7 @@ pickOneFromFew ({ options } as cfg) =
                 |> SelectList.toList
                 |> styleByIndex
                 |> renderFragments
-                |> row { rowCfg | spacing = 0, arrangement = Expand, stackWhenSmall = True }
+                |> row { rowCfg | spacing = 0, arrangement = Expand, stackWhenSmall = True, crossArrangement = Expand }
             ]
         ]
 
