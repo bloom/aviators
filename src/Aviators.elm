@@ -1,8 +1,8 @@
-module Aviators exposing (Arrangement(..), Debounce(..), OutlineButtonCfg, RowCfg, button, buttonCfg, callout, calloutCfg, calloutCfg_error, calloutCfg_ok, column, columnCfg, el, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, headline, headlineCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, subheadline, subheadlineCfg, wrapWithClasses, wrapWithTailwind)
+module Aviators exposing (Arrangement(..), Cell, Debounce(..), Flex, OutlineButtonCfg, RowCfg, autoCell, button, buttonCfg, callout, calloutCfg, calloutCfg_error, calloutCfg_ok, column, columnCfg, el, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, headline, headlineCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, ratioCell, root, row, rowCfg, rowWithCells, solidButton, solidButtonCfg, subheadline, subheadlineCfg, wrapWithClasses, wrapWithTailwind)
 
 {-| Aviators! The best UI Library made specifically for Bloom Built in Elm.
 
-@docs Debounce, button, buttonCfg, callout, calloutCfg, calloutCfg_ok, calloutCfg_error, column, columnCfg, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, OutlineButtonCfg, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, headline, headlineCfg, subheadline, subheadlineCfg, wrapWithClasses, el, wrapWithTailwind, Arrangement, RowCfg
+@docs Debounce, button, buttonCfg, callout, calloutCfg, calloutCfg_ok, calloutCfg_error, column, columnCfg, empty, errorText, floatingPage, floatingPageCfg, ghostButton, ghostButtonCfg, img, imgCfg, input, inputCfg, inputCfg_password, inputCfg_text, link, linkCfg, nav, navCfg, outlineButton, OutlineButtonCfg, outlineButtonCfg, paragraph, paragraphCfg, pickOneFromFew, pickOneFromFewCfg, root, row, rowCfg, solidButton, solidButtonCfg, headline, headlineCfg, subheadline, subheadlineCfg, wrapWithClasses, el, wrapWithTailwind, Arrangement, RowCfg, autoCell, ratioCell, Cell, rowWithCells, Flex
 
 -}
 
@@ -877,6 +877,15 @@ row :
     -> List (Html msg)
     -> Html msg
 row cfg children =
+    rowWithCells cfg <| List.map autoCell children
+
+
+{-| -}
+rowWithCells :
+    RowCfg msg
+    -> List (Cell msg)
+    -> Html msg
+rowWithCells cfg children =
     let
         spacer =
             div
@@ -901,21 +910,26 @@ row cfg children =
                 []
 
         filteredChildren =
-            List.filter (\a -> a /= text "") children
+            List.filter (\a -> a.content /= text "") children
 
         flexifiedChildren =
             List.map
                 (\child ->
                     Html.div
-                        [ tailwind <|
-                            case cfg.arrangement of
-                                Expand ->
-                                    [ flex_1 ]
+                        [ style <|
+                            case child.flex of
+                                AutoFlex ->
+                                    case cfg.arrangement of
+                                        Expand ->
+                                            [ ( "flex", "1" ) ]
 
-                                _ ->
-                                    []
+                                        _ ->
+                                            []
+
+                                FlexRatio ratio ->
+                                    [ ( "flex", toString ratio ) ]
                         ]
-                        [ child ]
+                        [ child.content ]
                 )
                 filteredChildren
 
@@ -1011,6 +1025,29 @@ type alias RowCfg msg =
     , crossArrangement : Arrangement
     , attributes : List (Html.Attribute msg)
     }
+
+
+{-| -}
+autoCell : Html msg -> Cell msg
+autoCell content =
+    { content = content, flex = AutoFlex }
+
+
+{-| -}
+ratioCell : Float -> Html msg -> Cell msg
+ratioCell ratio content =
+    { content = content, flex = FlexRatio ratio }
+
+
+{-| -}
+type alias Cell msg =
+    { content : Html msg, flex : Flex }
+
+
+{-| -}
+type Flex
+    = AutoFlex
+    | FlexRatio Float
 
 
 {-| -}
