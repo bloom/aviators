@@ -478,7 +478,7 @@ type alias InputConfig msg =
 inputCfg : InputConfig msg
 inputCfg =
     { type_ = "text"
-    , bgColor = "grey-light"
+    , bgColor = "gray"
     , debounce = NoDebounce
     , error = ""
     , label = ""
@@ -742,9 +742,9 @@ button cfg child =
 
             -- Background color
             , if cfg.disabled then
-                "bg-" ++ cfg.disabledBgColor
+                "bg-" ++ cfg.disabledBgColor ++ "-500"
               else
-                "bg-" ++ cfg.bgColor
+                "bg-" ++ cfg.bgColor ++ "-500"
             , "rounded"
             , "cursor-pointer"
             , "focus-outline"
@@ -802,7 +802,7 @@ buttonCfg =
     , maxWidth = "full"
     , textColor = "white"
     , bgColor = "blue"
-    , disabledBgColor = "grey-light"
+    , disabledBgColor = "gray"
     , disabledTextColor = "white"
     , onClick = Nothing
     , htmlNode = Html.button
